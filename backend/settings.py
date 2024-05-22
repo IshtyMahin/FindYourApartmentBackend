@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,6 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECRET_KEY = 'django-insecure-@ze_%j-qrynfo5u$!t&!fm4cmu8vz^^i6er#&r*1pkgrg-l$$!'
 
 import environ
+
 env = environ.Env()
 environ.Env.read_env()
 
@@ -116,15 +118,22 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': env("DB_NAME"),
+#         'USER': env("DB_USER"),
+#         'PASSWORD': env("DB_PASSWORD"),
+#         'HOST': env("DB_HOST"),
+#         'PORT': env("DB_PORT"),
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': env("DB_NAME"),
-        'USER': env("DB_USER"),
-        'PASSWORD': env("DB_PASSWORD"),
-        'HOST': env("DB_HOST"),
-        'PORT': env("DB_PORT"),
-    }
+    'default': dj_database_url.config(
+        # Feel free to alter this value to suit your needs.
+        default='postgres://findyourapartmentbackend_user:PbXBLYKguU2vr8xR9Cfydg6euhGKaCIG@dpg-cp72b9nsc6pc73cpk700-a.oregon-postgres.render.com/findyourapartmentbackend'
+    )
 }
 
 # SECRET_KEY=django-insecure-=j3y73t@m9%^oc5ddmqex1zbq%#do8&u=8$zf^=ki075y-+)8g
