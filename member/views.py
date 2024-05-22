@@ -73,7 +73,7 @@ class UserRegistrationAPIView(generics.CreateAPIView):
             print("token ",token)
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             print("uid ",uid)
-            confirm_link = f"http://127.0.0.1:8000/api/users/list/active/{uid}/{token}"
+            confirm_link = f"http://127.0.0.1:8000/api/users/active/{uid}/{token}"
             email_subject = "Confirm your Email"
             email_body = render_to_string("confirm_email.html",{"confirm_link":confirm_link})
             email = EmailMultiAlternatives(email_subject, '',to=[user.email])
