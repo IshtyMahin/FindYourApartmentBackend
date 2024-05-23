@@ -166,10 +166,11 @@ class ResetPasswordRequestView(APIView):
 
 class ResetPasswordView(APIView):
     def post(self,request,uid64,token):
+        print(request.data)
         serializer = ResetPasswordSerializer(data=request.data)
+        print(serializer)
         
         if serializer.is_valid():
-            
             try:
                 uid = urlsafe_base64_decode(uid64).decode()
                 user = User._default_manager.get(pk=uid)
@@ -182,4 +183,6 @@ class ResetPasswordView(APIView):
                 return Response("Successfully reset your password")
             else:
                 return Response({'error':'Resent password link is not valid'})
+        else:
+            return Response(serializer.errors, status=400)
             
