@@ -12,18 +12,19 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True, 'required': False}}
 
     def validate(self, attrs):
-
         if 'password' in attrs and attrs['password'] != attrs.get('confirm_password'):
-            raise serializers.ValidationError({"error": "Passwords don't match."})
+            raise serializers.ValidationError("Passwords don't match.")
+        
         if self.instance:
             userId = self.instance.id 
-        else: userId=None
+        else:
+            userId = None
 
         if User.objects.filter(username=attrs['username']).exclude(id=userId).exists():
-            raise serializers.ValidationError({"error": f"User with username '{attrs.username}' already exists"})
+            raise serializers.ValidationError(f"User with username '{attrs.username}' already exists.")
 
         if User.objects.filter(email=attrs['email']).exclude(id=userId).exists():
-            raise serializers.ValidationError({"error": "A user with that email already exists"})
+            raise serializers.ValidationError("A user with that email already exists.")
 
         return attrs
 
