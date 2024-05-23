@@ -165,12 +165,13 @@ class ResetPasswordRequestView(APIView):
         return Response(serializer.errors)
 
 class ResetPasswordView(APIView):
-    def post(self,request,uidb64,token):
+    def post(self,request,uid64,token):
         serializer = ResetPasswordSerializer(data=request.data)
         
         if serializer.is_valid():
+            
             try:
-                uid = urlsafe_base64_decode(uidb64).decode()
+                uid = urlsafe_base64_decode(uid64).decode()
                 user = User._default_manager.get(pk=uid)
             except(User.DoesNotExist):
                 user = None
