@@ -74,7 +74,7 @@ class ResetPasswordRequestSerializer(serializers.Serializer):
         return value
     
 class ResetPasswordSerializer(serializers.Serializer):
-    password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
     confirm_password = serializers.CharField(required=True)
 
 
