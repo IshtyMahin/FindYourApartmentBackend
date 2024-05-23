@@ -1,8 +1,6 @@
 
 from django.shortcuts import redirect
-
 from rest_framework import viewsets,generics
-
 from .serializers import UserSerializer,UserLoginSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -37,12 +35,11 @@ def verify_token(request):
     try:
         user = request.user
         serializer = UserSerializer(user)
-        serialized_user = serializer.data
-        
-        print("Authenticated user:", serialized_user)
-        return Response({'message': 'Token is valid','user': serialized_user})
+        userData = serializer.data
+        return Response({'message': 'Valid Token','user': userData})
+    
     except AuthenticationFailed:
-        return Response({'message': 'Token is invalid or expired'}, status=401)
+        return Response({'message': 'Invalid Token'})
 
 
 class UserView(viewsets.ReadOnlyModelViewSet):
@@ -54,10 +51,9 @@ class UserView(viewsets.ReadOnlyModelViewSet):
         user_id = pk
         try:
             user = User.objects.get(pk=user_id)
-            is_superuser = user.is_superuser
-            return Response({'user_id': user_id,'user_type':user.user_type, 'is_superuser': is_superuser})
+            return Response({'user_id': user_id,'user_type':user.user_type})
         except User.DoesNotExist:
-            return Response({'error': 'User does not exist'})
+            return Response({'error': 'User with this id does not exist'})
 
 
 class UserRegistrationAPIView(generics.CreateAPIView):
@@ -108,7 +104,7 @@ class UserLoginApiView(APIView):
             try:
                 user = User.objects.get(username=username)
             except User.DoesNotExist:
-                return Response({'error': 'User not found'})
+                return Response({'error': 'User with username ' + username+' does not exist'})
             
             user = authenticate(username=username, password=password)
             
@@ -130,22 +126,59 @@ class UserLogoutView(APIView):
         return redirect('login')
     
     
-class UserUpdateAPIView(generics.UpdateAPIView):
+class UserUpdateView(generics.UpdateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
     def get_object(self):
         pk = self.kwargs.get('pk')
         user = generics.get_object_or_404(User, pk=pk)
-        print(user)
         return user
     
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        print(instance)
+
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
+    
+from .serializers import ResetPasswordRequestSerializer,ResetPasswordSerializer
+    
+class ResetPasswordRequestView(APIView):
+    def post(self,request):
+        serializer = ResetPasswordRequestSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            user = User.objects.get(email=serializer.validated_data['email'])
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            confirm_link = f"https://findyourapartmemt.netlify.app/reset_password/{uid}/{token}"
+            email_subject = "Request for reset password"
+            email_body = render_to_string("resetPassword.html",{"confirm_link":confirm_link})
+            email = EmailMultiAlternatives(email_subject, '',to=[user.email])
+            email.attach_alternative(email_body,"text/html")
+            email.send()
+            return Response("Check your mail for password reset email")
+        return Response(serializer.errors)
+
+class ResetPasswordView(APIView):
+    def post(self,request,uidb64,token):
+        serializer = ResetPasswordSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            try:
+                uid = urlsafe_base64_decode(uidb64).decode()
+                user = User._default_manager.get(pk=uid)
+            except(User.DoesNotExist):
+                user = None
+                
+            if user and default_token_generator.check_token(user,token):
+                user.set_password(serializer.validated_data['new_password'])
+                user.save()
+                return Response("Successfully reset your password")
+            else:
+                return Response({'error':'Resent password link is not valid'})
+            
