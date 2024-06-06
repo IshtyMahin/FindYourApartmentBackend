@@ -1,6 +1,7 @@
 # Import necessary modules
 import environ
 from pathlib import Path
+import dj_database_url
 
 # Initialize environment variables
 env = environ.Env()
