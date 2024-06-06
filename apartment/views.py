@@ -28,28 +28,22 @@ class ApartmentViewSet(viewsets.ModelViewSet):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        print(instance, serializer)
         if serializer.is_valid():
             self.perform_update(serializer)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def perform_create(self, serializer):
-        print(serializer.validated_data)
-        images_data = self.request.FILES.getlist('images')
-        req_owner_id = serializer.validated_data['owner_id'] 
-        apartment = serializer.save(owner_id=req_owner_id)
-        print(images_data)
-        print(req_owner_id)
-        print(apartment)
-        for image_data in images_data:
-            ApartmentImage.objects.create(apartment=apartment, image=image_data)
+        apartment = serializer.save()
+        image_urls = self.request.data.get('uploaded_images', [])
+        for url in image_urls:
+            ApartmentImage.objects.create(apartment=apartment, image_url=url)
 
     def perform_update(self, serializer):
-        images_data = self.request.FILES.getlist('images')
         apartment = serializer.save()
-        for image_data in images_data:
-            ApartmentImage.objects.create(apartment=apartment, image=image_data)
+        image_urls = self.request.data.get('uploaded_images', [])
+        for url in image_urls:
+            ApartmentImage.objects.create(apartment=apartment, image_url=url)
 
 
 class BookingViewSet(viewsets.ModelViewSet):
