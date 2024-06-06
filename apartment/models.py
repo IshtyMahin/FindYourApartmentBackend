@@ -33,7 +33,7 @@ class Apartment(models.Model):
     
 class ApartmentImage(models.Model):
     apartment = models.ForeignKey(Apartment, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='apartment_images/',default='',null=True,blank=True)
+    image = models.URLField(default='',null=True,blank=True)
 
     def __str__(self):
         return f'{self.apartment.address} {self.id}'
