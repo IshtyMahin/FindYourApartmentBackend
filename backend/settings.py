@@ -120,7 +120,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(
         # Feel free to alter this value to suit your needs.
-        default='postgres://findyourapartmentbackend_user:PbXBLYKguU2vr8xR9Cfydg6euhGKaCIG@dpg-cp72b9nsc6pc73cpk700-a.oregon-postgres.render.com/findyourapartmentbackend'
+        default='postgresql://findyourapartment_user:YHFtWwvQAKOjhkMgFvKd59xBJ1ZPlNPp@dpg-cq02bo6ehbks73e5i4cg-a.oregon-postgres.render.com/findyourapartment'
     )
 }
 
